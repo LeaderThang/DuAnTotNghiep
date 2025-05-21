@@ -10,7 +10,7 @@ namespace DuAnTotNghiep.Controllers
 
 		public HomeController(ILogger<HomeController> logger)
 		{
-			Console.WriteLine("thang an cut");
+		
 			_logger = logger;
 		}
 
