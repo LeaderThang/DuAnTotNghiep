@@ -8,6 +8,7 @@ public partial class DuAnTotNghiep2025Context : DbContext
 {
     public DuAnTotNghiep2025Context()
     {
+
     }
 
     public DuAnTotNghiep2025Context(DbContextOptions<DuAnTotNghiep2025Context> options)
