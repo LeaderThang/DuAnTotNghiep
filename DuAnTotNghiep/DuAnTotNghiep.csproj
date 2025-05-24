@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="LBB\" />
+    <Folder Include="wwwroot\ILayoutAdmin\" />
   </ItemGroup>
 
 </Project>
