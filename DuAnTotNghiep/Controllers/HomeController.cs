@@ -10,10 +10,11 @@ namespace DuAnTotNghiep.Controllers
 
 		public HomeController(ILogger<HomeController> logger)
 		{
+			Console.WriteLine("Phuc");
 		
 			_logger = logger;
 		}
-
+		
 		public IActionResult Index()
 		{
 			return View();
