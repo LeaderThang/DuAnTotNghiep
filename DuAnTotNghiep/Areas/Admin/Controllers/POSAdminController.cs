@@ -7,9 +7,10 @@ using System.Linq;
 using System;
 using System.Threading.Tasks;
 
-namespace DuAnTotNghiep.Controllers
+namespace DuAnTotNghiep.Areas.Admin.Controllers
 {
-    public class POSAdminController : Controller
+    [Area("Admin")]
+    public class POSAdminController : Controller // Đảm bảo tên Controller là POSAdminController
     {
         private readonly DuAnTotNghiepDbContext _context;
 
@@ -18,7 +19,6 @@ namespace DuAnTotNghiep.Controllers
             _context = context;
         }
 
-        // Lớp đại diện cho một mặt hàng trong giỏ hàng để lưu trữ trong session
         public class CartItem
         {
             public Guid ProductDetailId { get; set; }
@@ -29,7 +29,6 @@ namespace DuAnTotNghiep.Controllers
             public double TotalItemPrice => Price * Quantity;
         }
 
-        // Lấy giỏ hàng từ session
         private List<CartItem> GetCart()
         {
             if (HttpContext.Session.TryGetValue("Cart", out byte[] cartBytes))
@@ -40,42 +39,40 @@ namespace DuAnTotNghiep.Controllers
             return new List<CartItem>();
         }
 
-        // Lưu giỏ hàng vào session
         private void SaveCart(List<CartItem> cart)
         {
             string cartJson = System.Text.Json.JsonSerializer.Serialize(cart);
             HttpContext.Session.Set("Cart", System.Text.Encoding.UTF8.GetBytes(cartJson));
         }
 
-        // GET: SanPhamTaiQuayController
-        // Hiển thị giỏ hàng hiện tại và tổng giá tiền
+        // GET: POSAdmin/Index
+        // Trang chính hiển thị giỏ hàng và các phần khác
         public ActionResult Index()
         {
             List<CartItem> cart = GetCart();
             ViewBag.TotalPrice = cart.Sum(item => item.TotalItemPrice);
-            return View(cart);
+            return View(cart); // Truyền giỏ hàng sang View
         }
 
-        // GET: SanPhamTaiQuayController/Search
-        // Tìm kiếm sản phẩm theo tên hoặc ID chi tiết sản phẩm
+        // GET: POSAdmin/Search
+        // Tìm kiếm sản phẩm, TRẢ VỀ PARTIAL VIEW
         [HttpGet]
         public async Task<IActionResult> Search(string query)
         {
-            if (string.IsNullOrEmpty(query))
+            List<SanPhamChiTiet> products = new List<SanPhamChiTiet>();
+            if (!string.IsNullOrEmpty(query))
             {
-                return View(new List<SanPhamChiTiet>());
-            }
-
-            var products = await _context.SanPhamChiTiets
+                products = await _context.SanPhamChiTiets
                                         .Include(spct => spct.IdSpNavigation)
                                         .Where(spct => spct.TenSp.Contains(query) || spct.IdSpct.ToString().Contains(query))
                                         .ToListAsync();
-
-            return View(products);
+            }
+            ViewBag.SearchQuery = query; // Để giữ lại từ khóa tìm kiếm trên giao diện
+            return PartialView("_SearchResultsPartial", products); // Trả về Partial View
         }
 
-        // POST: SanPhamTaiQuayController/AddToCart
-        // Thêm sản phẩm vào giỏ hàng
+        // POST: POSAdmin/AddToCart
+        // Thêm sản phẩm vào giỏ hàng, CẬP NHẬT GIỎ HÀNG TRẢ VỀ PARTIAL VIEW CỦA GIỎ
         [HttpPost]
         public async Task<IActionResult> AddToCart(Guid productDetailId, int quantity = 1)
         {
@@ -85,6 +82,7 @@ namespace DuAnTotNghiep.Controllers
 
             if (productDetail == null)
             {
+                // Có thể trả về lỗi JSON hoặc PartialView rỗng
                 return NotFound();
             }
 
@@ -103,16 +101,17 @@ namespace DuAnTotNghiep.Controllers
                     ProductName = productDetail.TenSp,
                     Price = productDetail.Gia,
                     Quantity = quantity,
-                    Image = productDetail.AnhDaiDien // Giả sử AnhDaiDien lưu đường dẫn/tên ảnh
+                    Image = productDetail.AnhDaiDien
                 });
             }
 
             SaveCart(cart);
-            return RedirectToAction(nameof(Index));
+            ViewBag.TotalPrice = cart.Sum(item => item.TotalItemPrice); // Cập nhật tổng giá
+            return PartialView("_CartTablePartial", cart); // Trả về Partial View của giỏ hàng
         }
 
-        // POST: SanPhamTaiQuayController/UpdateCartQuantity
-        // Cập nhật số lượng sản phẩm trong giỏ hàng
+        // POST: POSAdmin/UpdateCartQuantity
+        // Cập nhật số lượng sản phẩm trong giỏ hàng, CẬP NHẬT GIỎ HÀNG TRẢ VỀ PARTIAL VIEW CỦA GIỎ
         [HttpPost]
         public IActionResult UpdateCartQuantity(Guid productDetailId, int newQuantity)
         {
@@ -127,15 +126,16 @@ namespace DuAnTotNghiep.Controllers
                 }
                 else
                 {
-                    cart.Remove(itemToUpdate); // Xóa nếu số lượng là 0 hoặc ít hơn
+                    cart.Remove(itemToUpdate);
                 }
                 SaveCart(cart);
             }
-            return RedirectToAction(nameof(Index));
+            ViewBag.TotalPrice = cart.Sum(item => item.TotalItemPrice); // Cập nhật tổng giá
+            return PartialView("_CartTablePartial", cart); // Trả về Partial View của giỏ hàng
         }
 
-        // POST: SanPhamTaiQuayController/RemoveFromCart
-        // Xóa sản phẩm khỏi giỏ hàng
+        // POST: POSAdmin/RemoveFromCart
+        // Xóa sản phẩm khỏi giỏ hàng, CẬP NHẬT GIỎ HÀNG TRẢ VỀ PARTIAL VIEW CỦA GIỎ
         [HttpPost]
         public IActionResult RemoveFromCart(Guid productDetailId)
         {
@@ -147,11 +147,12 @@ namespace DuAnTotNghiep.Controllers
                 cart.Remove(itemToRemove);
                 SaveCart(cart);
             }
-            return RedirectToAction(nameof(Index));
+            ViewBag.TotalPrice = cart.Sum(item => item.TotalItemPrice); // Cập nhật tổng giá
+            return PartialView("_CartTablePartial", cart); // Trả về Partial View của giỏ hàng
         }
 
-        // GET: SanPhamTaiQuayController/Checkout
-        // Hiển thị trang thanh toán
+        // GET: POSAdmin/Checkout (Bạn có thể bỏ qua Action này nếu Checkout Form đã nằm trong Index View)
+        // Tuy nhiên, giữ lại để dễ dàng mở rộng sau này hoặc để Controller truyền data cụ thể cho form Checkout
         [HttpGet]
         public IActionResult Checkout()
         {
@@ -162,12 +163,11 @@ namespace DuAnTotNghiep.Controllers
             }
 
             ViewBag.TotalPrice = cart.Sum(item => item.TotalItemPrice);
-            // Bạn có thể truyền một CheckoutViewModel ở đây với các tùy chọn thanh toán
-            return View();
+            return View(); // Trả về View Checkout riêng biệt nếu bạn vẫn muốn có
         }
 
-        // POST: SanPhamTaiQuayController/ProcessPayment
-        // Xử lý quá trình thanh toán
+
+        // POST: POSAdmin/ProcessPayment
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProcessPayment(string paymentMethod, string customerName, string customerPhone, string customerAddress, string notes)
@@ -175,22 +175,21 @@ namespace DuAnTotNghiep.Controllers
             List<CartItem> cart = GetCart();
             if (!cart.Any())
             {
-                return RedirectToAction(nameof(Index)); // Giỏ hàng trống, không thể thanh toán
+                return RedirectToAction(nameof(Index)); // Cart is empty, cannot checkout
             }
 
             double totalAmount = cart.Sum(item => item.TotalItemPrice);
 
-            // Tạo hoặc lấy UserKhachHang mặc định cho bán tại quầy
-            var defaultUserId = Guid.Parse("00000000-0000-0000-0000-000000000001"); // ID mặc định
+            var defaultUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
             var existingUserKhachHang = await _context.UserKhachHangs.FirstOrDefaultAsync(u => u.IdUser == defaultUserId);
             if (existingUserKhachHang == null)
             {
-                //existingUserKhachHang = new UserKhachHang { IdUser = defaultUserId, UserName = "GuestPOS", Email = "pos@example.com", Sdt = "0000000000", DiaChi = "Unknown" }; // Cần điền đầy đủ các trường bắt buộc khác nếu có
+                //// Đảm bảo các trường này có giá trị mặc định hoặc cho phép null trong model UserKhachHang
+                //existingUserKhachHang = new UserKhachHang { IdUser = defaultUserId, UserName = "GuestPOS", Email = "pos@example.com", Sdt = "0000000000", DiaChi = "Unknown" };
                 _context.UserKhachHangs.Add(existingUserKhachHang);
                 await _context.SaveChangesAsync();
             }
 
-            // Tạo HoaDon
             var hoaDon = new HoaDon
             {
                 IdHoaDon = Guid.NewGuid(),
@@ -199,13 +198,12 @@ namespace DuAnTotNghiep.Controllers
             _context.HoaDons.Add(hoaDon);
             await _context.SaveChangesAsync();
 
-            // Tạo ThanhToan
             var thanhToan = new ThanhToan
             {
                 IdThanhToan = Guid.NewGuid(),
                 IdHoaDon = hoaDon.IdHoaDon,
                 PhuongThucThanhToan = paymentMethod,
-                Status = "Completed", // Hoặc "Pending" tùy thuộc vào cổng thanh toán
+                Status = "Completed",
                 SoTienThanhToan = totalAmount,
                 HoTen = customerName,
                 Sdt = customerPhone,
@@ -215,7 +213,6 @@ namespace DuAnTotNghiep.Controllers
             _context.ThanhToans.Add(thanhToan);
             await _context.SaveChangesAsync();
 
-            // Tạo SanPhamThanhToan và cập nhật TonKho
             foreach (var item in cart)
             {
                 var sanPhamThanhToan = new SanPhamThanhToan
@@ -228,38 +225,33 @@ namespace DuAnTotNghiep.Controllers
                 };
                 _context.SanPhamThanhToans.Add(sanPhamThanhToan);
 
-                // Cập nhật TonKho (số lượng tồn kho)
                 var tonKho = await _context.TonKhos.FirstOrDefaultAsync(tk => tk.IdSpct == item.ProductDetailId);
                 if (tonKho != null)
                 {
-                    tonKho.SoLuongTonKho -= item.Quantity; // Giảm số lượng tồn kho
+                    tonKho.SoLuongTonKho -= item.Quantity;
                     tonKho.NgayCapNhap = DateTime.Now;
                     _context.TonKhos.Update(tonKho);
                 }
                 else
                 {
-                    // Xử lý trường hợp không tìm thấy TonKho (ví dụ: tạo mới hoặc ghi log lỗi)
-                    // Ở đây, tôi sẽ thêm một mục mới với số lượng âm để cho thấy sự giảm số lượng từ ban đầu là 0.
                     _context.TonKhos.Add(new TonKho
                     {
                         IdTonKho = Guid.NewGuid(),
                         IdSpct = item.ProductDetailId,
-                        SoLuongTonKho = -item.Quantity, // Giảm từ 0 nếu không tìm thấy
-                        NgayCapNhap = DateTime.Now,                        
-                        //Status = "Inactive" // Hoặc trạng thái phù hợp hơn
+                        SoLuongTonKho = -item.Quantity,
+                        NgayCapNhap = DateTime.Now,
+                        //NgayTao = DateTime.Now,
+                        //Status = "Inactive"
                     });
                 }
             }
             await _context.SaveChangesAsync();
 
-            // Xóa giỏ hàng sau khi thanh toán thành công
             HttpContext.Session.Remove("Cart");
 
             return RedirectToAction("Receipt", new { invoiceId = hoaDon.IdHoaDon });
         }
 
-        // GET: SanPhamTaiQuayController/Receipt/{invoiceId}
-        // Hiển thị hóa đơn sau khi thanh toán
         public async Task<IActionResult> Receipt(Guid invoiceId)
         {
             var invoice = await _context.HoaDons
@@ -276,74 +268,19 @@ namespace DuAnTotNghiep.Controllers
             return View(invoice);
         }
 
-        // Các hành động CRUD gốc của controller (có thể giữ lại, xóa hoặc sửa đổi tùy theo nhu cầu thực tế)
-        // GET: SanPhamTaiQuayController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: SanPhamTaiQuayController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: SanPhamTaiQuayController/Create
+        // Các Action CRUD cũ có thể được giữ hoặc xóa tùy nhu cầu
+        public ActionResult Details(int id) { return View(); }
+        public ActionResult Create() { return View(); }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: SanPhamTaiQuayController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: SanPhamTaiQuayController/Edit/5
+        public ActionResult Create(IFormCollection collection) { try { return RedirectToAction(nameof(Index)); } catch { return View(); } }
+        public ActionResult Edit(int id) { return View(); }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: SanPhamTaiQuayController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: SanPhamTaiQuayController/Delete/5
+        public ActionResult Edit(int id, IFormCollection collection) { try { return RedirectToAction(nameof(Index)); } catch { return View(); } }
+        public ActionResult Delete(int id) { return View(); }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+        public ActionResult Delete(int id, IFormCollection collection) { try { return RedirectToAction(nameof(Index)); } catch { return View(); } }
     }
 }

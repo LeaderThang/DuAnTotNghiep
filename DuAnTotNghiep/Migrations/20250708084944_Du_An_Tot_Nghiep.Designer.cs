@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DuAnTotNghiep.Migrations
 {
     [DbContext(typeof(DuAnTotNghiepDbContext))]
-    [Migration("20250605142823_Du_An_Tot_Nghiep")]
+    [Migration("20250708084944_Du_An_Tot_Nghiep")]
     partial class Du_An_Tot_Nghiep
     {
         /// <inheritdoc />

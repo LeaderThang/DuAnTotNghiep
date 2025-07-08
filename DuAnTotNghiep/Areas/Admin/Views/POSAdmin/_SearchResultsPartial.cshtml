@@ -1,0 +1,51 @@
+﻿@model IEnumerable<DuAnTotNghiep.Models.SanPhamChiTiet>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-sm table-bordered">
+        <thead>
+            <tr>
+                <th>Ảnh</th>
+                <th>Tên SP</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.AnhDaiDien))
+                        {
+                            <img src="~/images/@item.AnhDaiDien" alt="@item.TenSp" style="width: 30px; height: 30px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <span>No Img</span>
+                        }
+                    </td>
+                    <td>@item.TenSp</td>
+                    <td>@item.Gia.ToString("N0") VND</td>
+                    <td>@item.SoLuongBan</td>
+                    <td>
+                        <form class="addToCartForm" asp-controller="POSAdmin" asp-action="AddToCart" method="post" style="display:inline;">
+                            <input type="hidden" name="productDetailId" value="@item.IdSpct" />
+                            <input type="number" name="quantity" value="1" min="1" class="form-control form-control-sm" style="width: 60px; display: inline-block;" />
+                            <button type="submit" class="btn btn-success btn-sm ml-1">Add</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (!string.IsNullOrEmpty(ViewBag.SearchQuery))
+{
+    <p>Không tìm thấy sản phẩm nào với từ khóa "@ViewBag.SearchQuery".</p>
+}
+else
+{
+    <p>Nhập từ khóa để tìm kiếm sản phẩm.</p>
+}

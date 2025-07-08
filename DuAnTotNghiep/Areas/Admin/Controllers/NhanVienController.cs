@@ -2,8 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using DuAnTotNghiep.Models;
 
-namespace DuAnTotNghiep.Controllers
+namespace DuAnTotNghiep.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class NhanVienController : Controller
     {
         private readonly DuAnTotNghiepDbContext _context;

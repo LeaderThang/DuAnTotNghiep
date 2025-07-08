@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm kiếm sản phẩm</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 30px;
+        }
+
+        #searchInput {
+            width: 300px;
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        #results {
+            margin-top: 10px;
+            border: 1px solid #eee;
+            padding: 10px;
+            min-height: 50px; /* Đảm bảo có chiều cao tối thiểu */
+        }
+
+        .item {
+            padding: 6px;
+            border-bottom: 1px solid #ddd;
+        }
+
+            .item:last-child {
+                border-bottom: none;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        img {
+            max-width: 30px;
+            max-height: 30px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <h2>Tìm kiếm sản phẩm theo tên hoặc ID</h2>
+    <input type="text" id="searchInput" placeholder="Nhập tên hoặc ID sản phẩm...">
+    <button id="searchButton">Tìm kiếm</button>
+    <div id="results">
+        <p>Kết quả tìm kiếm sẽ hiển thị ở đây.</p>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            const searchInput = $('#searchInput');
+            const searchButton = $('#searchButton');
+            const resultsDiv = $('#results');
+
+            // Hàm thực hiện tìm kiếm
+            function performSearch() {
+                const query = searchInput.val().trim(); // Lấy giá trị từ input
+
+                if (query === '') {
+                    resultsDiv.html('<p>Kết quả tìm kiếm sẽ hiển thị ở đây.</p>');
+                    return;
+                }
+
+                // Thực hiện AJAX call đến Controller
+                $.ajax({
+                    url: '/Admin/POSAdmin/Search', // Đảm bảo đường dẫn này đúng với Controller và Area của bạn
+                    type: 'GET', // Phương thức HTTP
+                    data: { query: query }, // Dữ liệu gửi đi (từ khóa tìm kiếm)
+                    success: function(data) {
+                        // Khi thành công, data chứa HTML từ _SearchResultsPartial
+                        if (data.trim() === '<p>Nhập từ khóa để tìm kiếm sản phẩm.</p>') {
+                             resultsDiv.html('<p>Không tìm thấy sản phẩm nào.</p>');
+                        } else if (data.includes('table')) { // Nếu phản hồi có chứa bảng
+                            resultsDiv.html(data);
+                        } else {
+                            // Nếu không phải bảng, có thể là thông báo "Không tìm thấy"
+                            resultsDiv.html(data);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Lỗi khi tìm kiếm sản phẩm:", error);
+                        resultsDiv.html('<p style="color: red;">Đã xảy ra lỗi khi tìm kiếm sản phẩm. Vui lòng thử lại.</p>');
+                    }
+                });
+            }
+
+            // Gắn sự kiện cho nút tìm kiếm
+            searchButton.on('click', performSearch);
+
+            // Tùy chọn: Gắn sự kiện cho phím Enter trong ô tìm kiếm
+            searchInput.on('keypress', function(e) {
+                if (e.which === 13) { // Phím Enter
+                    e.preventDefault(); // Ngăn chặn form submit nếu có
+                    performSearch();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
