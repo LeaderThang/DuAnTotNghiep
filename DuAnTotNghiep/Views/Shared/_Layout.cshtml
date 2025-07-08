@@ -1,49 +1,41 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - DuAnTotNghiep</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/DuAnTotNghiep.styles.css" asp-append-version="true" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] - Dashboard</title>
+    <!-- Corrected asset paths -->
+    <link rel="stylesheet" href="@Url.Content("~/assets/vendors/mdi/css/materialdesignicons.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/assets/vendors/ti-icons/css/themify-icons.css")">
+    <link rel="stylesheet" href="@Url.Content("~/assets/vendors/css/vendor.bundle.base.css")">
+    <link rel="stylesheet" href="@Url.Content("~/assets/vendors/font-awesome/css/font-awesome.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/assets/css/style.css")">
+    <link rel="shortcut icon" href="@Url.Content("~/assets/images/favicon.png")" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">DuAnTotNghiep</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+    <div class="container-scroller">
+        @* Navbar + Sidebar giữ nguyên như cũ *@
+
+        <div class="container-fluid page-body-wrapper">
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    @RenderBody()
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - DuAnTotNghiep - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <!-- Scripts with correct paths -->
+    <script src="@Url.Content("~/assets/vendors/js/vendor.bundle.base.js")"></script>
+    <script src="@Url.Content("~/assets/vendors/chart.js/chart.umd.js")"></script>
+    <script src="@Url.Content("~/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/off-canvas.js")"></script>
+    <script src="@Url.Content("~/assets/js/misc.js")"></script>
+    <script src="@Url.Content("~/assets/js/settings.js")"></script>
+    <script src="@Url.Content("~/assets/js/todolist.js")"></script>
+    <script src="@Url.Content("~/assets/js/dashboard.js")"></script>
+    @RenderSection("Scripts", required: false)
+
 </body>
 </html>

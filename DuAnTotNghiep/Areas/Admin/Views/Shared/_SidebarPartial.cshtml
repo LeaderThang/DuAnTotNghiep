@@ -1,0 +1,76 @@
+﻿@*
+    Đây là file Partial View cho thanh điều hướng bên trái (Sidebar).
+    Nó sử dụng Tag Helpers (asp-controller, asp-action, asp-area) để tạo các URL chính xác.
+*@
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+    <ul class="nav">
+        <li class="nav-item nav-profile">
+            <a href="#" class="nav-link">
+                <div class="nav-profile-image">
+                    @* Thay bằng ảnh đại diện của admin *@
+                    <img src="~/LayoutAdmin/assets/images/faces/face1.jpg" alt="profile">
+                    <span class="login-status online"></span>
+                </div>
+                <div class="nav-profile-text d-flex flex-column">
+                    <span class="font-weight-bold mb-2">Tên Admin</span>
+                    <span class="text-secondary text-small">Quản trị viên</span>
+                </div>
+                <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">
+                <span class="menu-title">Bán Hàng Tại Quầy</span>
+                <i class="mdi mdi-point-of-sale menu-icon"></i>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" asp-area="Admin" asp-controller="HoaDon" asp-action="Index">
+                <span class="menu-title">Quản lý Hóa Đơn</span>
+                <i class="mdi mdi-receipt menu-icon"></i>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#quan-ly-san-pham" aria-expanded="false" aria-controls="quan-ly-san-pham">
+                <span class="menu-title">Quản lý Sản Phẩm</span>
+                <i class="menu-arrow"></i>
+                <i class="mdi mdi-store menu-icon"></i>
+            </a>
+            <div class="collapse" id="quan-ly-san-pham">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" asp-area="Admin" asp-controller="SanPham" asp-action="Index">Sản Phẩm</a></li>
+                    <li class="nav-item"> <a class="nav-link" asp-area="Admin" asp-controller="LoaiSanPham" asp-action="Index">Loại Sản Phẩm</a></li>
+                    <li class="nav-item"> <a class="nav-link" asp-area="Admin" asp-controller="MauSac" asp-action="Index">Màu Sắc</a></li>
+                    <li class="nav-item"> <a class="nav-link" asp-area="Admin" asp-controller="ChatLieu" asp-action="Index">Chất Liệu</a></li>
+                    @* Thêm các mục quản lý khác nếu có *@
+                </ul>
+            </div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#quan-ly-nguoi-dung" aria-expanded="false" aria-controls="quan-ly-nguoi-dung">
+                <span class="menu-title">Quản lý Tài Khoản</span>
+                <i class="menu-arrow"></i>
+                <i class="mdi mdi-account-group menu-icon"></i>
+            </a>
+            <div class="collapse" id="quan-ly-nguoi-dung">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" asp-area="Admin" asp-controller="KhachHang" asp-action="Index">Khách Hàng</a></li>
+                    <li class="nav-item"> <a class="nav-link" asp-area="Admin" asp-controller="NhanVien" asp-action="Index">Nhân Viên</a></li>
+                     <li class="nav-item"> <a class="nav-link" asp-area="Admin" asp-controller="Users" asp-action="Index">Users</a></li>
+                </ul>
+            </div>
+        </li>
+
+         <li class="nav-item">
+            <a class="nav-link" asp-area="Admin" asp-controller="KhuyenMai" asp-action="Index">
+                <span class="menu-title">Quản lý Khuyến Mãi</span>
+                <i class="mdi mdi-tag-multiple menu-icon"></i>
+            </a>
+        </li>
+
+    </ul>
+</nav>
